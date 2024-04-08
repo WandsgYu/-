@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>运动会数据筛选(各项目分表)</title>
+<title>运动会数据筛选</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -22,6 +22,7 @@
     h2 {
         text-align: center;
         margin-bottom: 20px;
+        font-family: KaiTi, "楷体", serif; /* 使用楷体字体 */
     }
     input[type="file"] {
         margin-bottom: 10px;
@@ -33,7 +34,7 @@
         margin-right: 20px;
     }
     table {
-        width: 50%;
+        width: 80%; /* 修改表格宽度为80% */
         border-collapse: collapse;
         margin-top: 20px;
     }
@@ -44,12 +45,17 @@
     }
     th {
         background-color: #f2f2f2;
+        font-family: KaiTi, "楷体", serif; /* 使用楷体字体 */
+    }
+    #selectedUnit,
+    #totalPeople {
+        font-family: KaiTi, "楷体", serif; /* 使用楷体字体 */
     }
 </style>
 </head>
 <body>
 <div class="container">
-    <h2>运动会数据筛选(各项目分表)</h2>
+    <h2>运动会数据筛选</h2>
     <input type="file" id="fileInput">
     <label for="group">组别：</label>
     <select id="group">
@@ -83,9 +89,13 @@
     <table id="dataTable">
         <thead>
             <tr>
-                <th colspan="4">单位：<span id="selectedUnit">xxx学院</span>（<span id="totalPeople">0</span>人）：</th>
+                <th colspan="8">单位：<span id="selectedUnit">xxx学院</span>（<span id="totalPeople">0</span>人）：</th>
             </tr>
             <tr>
+                <th>序号</th>
+                <th>姓名</th>
+                <th>成绩</th>
+                <th>领奖票签字</th>
                 <th>序号</th>
                 <th>姓名</th>
                 <th>成绩</th>
@@ -137,25 +147,54 @@
         const tableBody = document.getElementById('dataBody');
         tableBody.innerHTML = '';
 
-        data.forEach((row, index) => {
-            const name = row['姓名'];
-            const score = row['成绩'] || ''; // 如果成绩字段为空，则默认为空字符串
+        const rowCount = Math.ceil(data.length / 2); // 计算行数
+
+        let index = 1; // 序号从1开始
+
+        for (let i = 0; i < rowCount; i++) {
             const tr = document.createElement('tr');
-            const tdIndex = document.createElement('td');
-            const tdName = document.createElement('td');
-            const tdScore = document.createElement('td');
-            const tdSignature = document.createElement('td');
 
-            tdIndex.textContent = index + 1; // 序号从1开始
-            tdName.textContent = name;
-            tdScore.textContent = score;
+            // 填充第一列数据
+            const dataIndex = i * 2;
+            if (dataIndex < data.length) {
+                appendUserData(tr, data[dataIndex], index++);
+            } else {
+                appendEmptyUserData(tr); // 填充空数据
+            }
 
-            tr.appendChild(tdIndex);
-            tr.appendChild(tdName);
-            tr.appendChild(tdScore);
-            tr.appendChild(tdSignature);
+            // 填充第二列数据
+            const nextIndex = dataIndex + 1;
+            if (nextIndex < data.length) {
+                appendUserData(tr, data[nextIndex], index++);
+            } else {
+                appendEmptyUserData(tr); // 填充空数据
+            }
+
             tableBody.appendChild(tr);
-        });
+        }
+    }
+
+    function appendUserData(tr, userData, index) {
+        const tdIndex = document.createElement('td');
+        const tdName = document.createElement('td');
+        const tdScore = document.createElement('td');
+        const tdSignature = document.createElement('td');
+
+        tdIndex.textContent = index; // 填写序号
+        tdName.textContent = userData['姓名'] || '';
+        tdScore.textContent = userData['成绩'] || ''; // 如果成绩字段为空，则默认为空字符串
+
+        tr.appendChild(tdIndex);
+        tr.appendChild(tdName);
+        tr.appendChild(tdScore);
+        tr.appendChild(tdSignature);
+    }
+
+    function appendEmptyUserData(tr) {
+        for (let i = 0; i < 4; i++) {
+            const td = document.createElement('td');
+            tr.appendChild(td);
+        }
     }
 
     function displayUnitInfo(unit, count) {
