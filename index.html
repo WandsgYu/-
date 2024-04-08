@@ -146,6 +146,10 @@
 </div>
 
 <script>
+    document.getElementById('group').addEventListener('change', filterData);
+    document.getElementById('project').addEventListener('change', filterData);
+    document.getElementById('union').addEventListener('change', filterData);
+
     function filterData() {
         const groupFilter = document.getElementById('group').value;
         const projectFilter = document.getElementById('project').value;
@@ -182,38 +186,37 @@
     }
 
     function displayData(data) {
-    const tableBody = document.getElementById('dataBody');
-    tableBody.innerHTML = '';
+        const tableBody = document.getElementById('dataBody');
+        tableBody.innerHTML = '';
 
-    const rowCount = Math.ceil(data.length / 2); // 计算行数
+        const rowCount = Math.ceil(data.length / 2); // 计算行数
 
-    let index = 1; // 序号从1开始
+        let index = 1; // 序号从1开始
 
-    for (let i = 0; i < rowCount; i++) {
-        const tr = document.createElement('tr');
+        for (let i = 0; i < rowCount; i++) {
+            const tr = document.createElement('tr');
 
-        // 填充第一列数据
-        const dataIndex = i;
-   
-        if (dataIndex < data.length) {
-            appendUserData(tr, data[dataIndex], index++);
-        } else {
-            appendEmptyUserData(tr); // 填充空数据
+            // 填充第一列数据
+            const dataIndex = i;
+
+            if (dataIndex < data.length) {
+                appendUserData(tr, data[dataIndex], index++);
+            } else {
+                appendEmptyUserData(tr); // 填充空数据
+            }
+
+            // 填充第二列数据
+            const nextIndex = i + rowCount;
+
+            if (nextIndex < data.length) {
+                appendUserData(tr, data[nextIndex], index-1+rowCount);
+            } else {
+                appendEmptyUserData(tr); // 填充空数据
+            }
+
+            tableBody.appendChild(tr);
         }
-
-        // 填充第二列数据
-        const nextIndex = i + rowCount;
-
-        if (nextIndex < data.length) {
-            appendUserData(tr, data[nextIndex], index-1+rowCount);
-        } else {
-            appendEmptyUserData(tr); // 填充空数据
-        }
-
-        tableBody.appendChild(tr);
     }
-}
-
 
     function appendUserData(tr, userData, index) {
         const tdIndex = document.createElement('td');
