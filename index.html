@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>运动会数据筛选(各项目分表)</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    input[type="file"] {
+        margin-bottom: 10px;
+    }
+    label {
+        margin-right: 10px;
+    }
+    select {
+        margin-right: 20px;
+    }
+    table {
+        width: 50%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>运动会数据筛选(各项目分表)</h2>
+    <input type="file" id="fileInput">
+    <label for="group">组别：</label>
+    <select id="group">
+        <option value="">全部</option>
+        <option value="男子甲组">男子甲组</option>
+        <option value="男子乙组">男子乙组</option>
+        <option value="女子甲组">女子甲组</option>
+        <option value="女子乙组">女子乙组</option>
+    </select>
+    <label for="project">项目：</label>
+    <select id="project">
+        <option value="">全部</option>
+        <option value="定时投篮">定时投篮</option>
+        <option value="摸石过河">摸石过河</option>
+        <option value="托球跑">托球跑</option>
+        <option value="跳小绳">跳小绳</option>
+        <option value="踢毽子">踢毽子</option>
+        <option value="滚铁环">滚铁环</option>
+        <option value="铅球">铅球</option>
+        <option value="赶鸭子">赶鸭子</option>
+    </select>
+    <label for="union">单位：</label>
+    <select id="union">
+        <option value="">全部</option>
+        <option value="经管学院分工会">经管学院分工会</option>
+        <option value="自动化学院分工会">自动化学院分工会</option>
+        <option value="计算机学院分工会">计算机学院分工会</option>
+    </select>
+    <button onclick="filterData()">确定</button>
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th colspan="4">单位：<span id="selectedUnit">xxx学院</span>（<span id="totalPeople">0</span>人）：</th>
+            </tr>
+            <tr>
+                <th>序号</th>
+                <th>姓名</th>
+                <th>成绩</th>
+                <th>领奖票签字</th>
+            </tr>
+        </thead>
+        <tbody id="dataBody">
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function filterData() {
+        const groupFilter = document.getElementById('group').value;
+        const projectFilter = document.getElementById('project').value;
+        const unionFilter = document.getElementById('union').value;
+
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const data = e.target.result;
+            const workbook = XLSX.read(data, {type: 'binary'});
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+            const filteredData = jsonData.filter(row => {
+                if (groupFilter && row['组别'] !== groupFilter) return false;
+                if (projectFilter && !row['个人项目'].includes(projectFilter)) return false;
+                if (unionFilter && row['所属工会'] !== unionFilter) return false;
+                return true;
+            });
+
+            filteredData.sort((a, b) => {
+                // 排序规则可以根据需要修改，这里假设成绩字段为字符串形式的数字，从小到大排序
+                return parseFloat(a['成绩']) - parseFloat(b['成绩']);
+            });
+
+            displayData(filteredData);
+            displayUnitInfo(unionFilter, filteredData.length);
+        };
+
+        reader.readAsBinaryString(file);
+    }
+
+    function displayData(data) {
+        const tableBody = document.getElementById('dataBody');
+        tableBody.innerHTML = '';
+
+        data.forEach((row, index) => {
+            const name = row['姓名'];
+            const score = row['成绩'] || ''; // 如果成绩字段为空，则默认为空字符串
+            const tr = document.createElement('tr');
+            const tdIndex = document.createElement('td');
+            const tdName = document.createElement('td');
+            const tdScore = document.createElement('td');
+            const tdSignature = document.createElement('td');
+
+            tdIndex.textContent = index + 1; // 序号从1开始
+            tdName.textContent = name;
+            tdScore.textContent = score;
+
+            tr.appendChild(tdIndex);
+            tr.appendChild(tdName);
+            tr.appendChild(tdScore);
+            tr.appendChild(tdSignature);
+            tableBody.appendChild(tr);
+        });
+    }
+
+    function displayUnitInfo(unit, count) {
+        const unitInfo = document.getElementById('selectedUnit');
+        unitInfo.textContent = unit;
+        document.getElementById('totalPeople').textContent = count;
+    }
+</script>
+
+<!-- 引入 XLSX 库 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+</body>
+</html>
