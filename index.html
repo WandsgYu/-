@@ -37,15 +37,19 @@
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
+        border: 1px solid black; /* 设置表格边框为1像素 */
     }
     th, td {
-        border: 1px solid #ddd;
+        border: 1px solid black; /* 设置单元格边框为1像素 */
         padding: 8px;
-        text-align: left;
+        text-align: center;
+        background-color: transparent !important;
     }
     th {
-        background-color: #f2f2f2;
-        font-family: KaiTi, "楷体", serif; /* 使用楷体字体 */
+        background-color: transparent !important;
+    }
+    th[colspan="8"] {
+        text-align: left; /* 让表头的单位信息左对齐 */
     }
     #selectedUnit,
     #totalPeople {
@@ -101,25 +105,30 @@
     </select>
     <label for="union">单位：</label>
     <select id="union">
-        <option value="">全部</option>
+        <option value="" selected>全部</option>
+        <option value="通信学院分工会" >通信学院分工会</option>
         <option value="电子工程学院分工会">电子工程学院分工会</option>
-        <option value="后勤集团分工会">后勤集团分工会</option>
-        <option value="机关分工会">机关分工会</option>
         <option value="计算机学院分工会">计算机学院分工会</option>
+        <option value="自动化学院分工会" >自动化学院分工会</option>
+        <option value="网络安全分工会">网络安全分工会</option>
         <option value="经管学院分工会">经管学院分工会</option>
+        <option value="现代邮政学院分工会">现代邮政学院分工会</option>
         <option value="理学院分工会">理学院分工会</option>
         <option value="马克思学院分工会">马克思学院分工会</option>
-        <option value="人文与外国语学院分工会">人文与外国语学院分工会</option>
+        <option value="人文与外国语学院分工会">人文与外国语学院分工会</option> 
         <option value="数字艺术学院分工会">数字艺术学院分工会</option>
-        <option value="通信学院分工会">通信学院分工会</option>
+        <option value="后勤集团分工会">后勤集团分工会</option>
+        <option value="机关分工会">机关分工会</option> 
         <option value="图书信息分工会">图书信息分工会</option>
-        <option value="网络安全分工会">网络安全分工会</option>
-        <option value="现代邮政学院分工会">现代邮政学院分工会</option>
-        <option value="自动化学院分工会" selected>自动化学院分工会</option>
     </select>
     
     <button onclick="filterData()">确定</button>
     <button class="copy-button" onclick="copyTableToClipboard()">复制表格</button>
+    <button onclick="selectNextUnionOptionAndFilter()">下一步</button>
+
+
+
+
     <strong>粘贴前需要提前设置excel表格的宽度</strong>
 
 
@@ -146,6 +155,8 @@
 </div>
 
 <script>
+  
+
     document.getElementById('group').addEventListener('change', filterData);
     document.getElementById('project').addEventListener('change', filterData);
     document.getElementById('union').addEventListener('change', filterData);
@@ -265,6 +276,72 @@
             copyPopup.style.display = 'none';
         }, 3000);
     }
+    let flag = 0; // 默认 flag 为 0
+    function setFlag() {
+    flag = 1;
+}
+
+    function exportByUnion() {
+    const unionSelect = document.getElementById('union');
+    const options = unionSelect.options;
+
+    // 创建一个新的表格
+    const newTable = document.createElement('table');
+    const newTableBody = document.createElement('tbody');
+    newTable.appendChild(newTableBody);
+
+    for (let i = 0; i < options.length; i++) {
+        const union = options[i].value; 
+      
+   
+        if (union) {
+            document.getElementById('union').value = union;
+            filterData();
+            
+            // 将当前单位的数据添加到新表格中
+            const oldTableBody = document.getElementById('dataBody');
+            const oldTableRows = oldTableBody.querySelectorAll('tr');
+           
+            oldTableRows.forEach(row => {
+               
+                const newRow = row.cloneNode(true);
+                newTableBody.appendChild(newRow);
+            
+                
+            });
+        }
+    }
+
+    // 将新表格复制到剪贴板
+    const range = document.createRange();
+    range.selectNode(newTable);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+}
+
+
+function selectNextUnionOptionAndFilter() {
+    const unionSelect = document.getElementById('union');
+    const options = unionSelect.options;
+    let selectedIndex = unionSelect.selectedIndex;
+
+    // 如果当前选项不是最后一个选项，则选择下一个选项
+    if (selectedIndex < options.length - 1) {
+        unionSelect.selectedIndex = selectedIndex + 1;
+    } else {
+        // 如果当前选项是最后一个选项，则选择第一个选项
+        unionSelect.selectedIndex = 0;
+    }
+
+    // 执行数据过滤
+    filterData();
+        // 复制表格
+        copyTableToClipboard();
+}
+
+
 </script>
 
 <!-- 引入 XLSX 库 -->
